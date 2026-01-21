@@ -27,3 +27,8 @@ Finally, run the benchmark with:
 ```bash
 uv run --env-file .env benchmark.py
 ```
+
+If you want to chat with the agent, run the web client via:
+```bash
+uv run --env-file .env uvicorn partial_mcp.web:app --port 8000
+```
