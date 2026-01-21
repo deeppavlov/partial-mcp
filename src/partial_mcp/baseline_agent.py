@@ -14,13 +14,11 @@ model = OpenAIChatModel(
     provider=OpenAIProvider(
         api_key=os.environ["API_KEY"],
         base_url=os.environ["BASE_URL"],
-    )
+    ),
 )
 
-agent = Agent(
-    model=model,
-    toolsets=toolsets
-)
+agent = Agent(model=model, toolsets=toolsets)
+
 
 async def chat(request: str) -> str:
     result = await agent.run(request)

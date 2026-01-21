@@ -1,7 +1,3 @@
-import dotenv
-
-dotenv.load_dotenv()
-
 import logfire
 
 from pydantic_evals import Case, Dataset
@@ -26,7 +22,7 @@ dataset = Dataset(
                 HasMatchingSpan(
                     query={"name_contains": "add"},
                 ),
-            )
+            ),
         ),
         Case(
             inputs="What is 5+7?",
@@ -35,7 +31,7 @@ dataset = Dataset(
                 HasMatchingSpan(
                     query={"name_contains": "add"},
                 ),
-            )
+            ),
         ),
     ],
     evaluators=[
@@ -43,7 +39,7 @@ dataset = Dataset(
             rubric="Response provides the same answer as expected, possibly with explanation",
             include_input=True,
             include_expected_output=True,
-            model=model
+            model=model,
         ),
     ],
 )

@@ -5,6 +5,4 @@ from fastmcp import FastMCP
 from .calculator import server as calculator
 
 
-servers: list[FastMCP[Any]] = [
-    calculator
-]
+servers: list[FastMCP[Any]] = [calculator]
