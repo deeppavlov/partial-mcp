@@ -16,6 +16,11 @@ conditions from [.pre-commit-config.yaml](.pre-commit-config.yaml). Namely:
 - Ruff's linter fails
 - Pyrefly's type checking fails
 
+If you want to run the checks manually, execute the following command
+```bash
+uv run pre-commit run --all-files
+```
+
 Next, you need to add LLM credentials. For that, copy the `.env.example` file
 to `.env`:
 ```bash
