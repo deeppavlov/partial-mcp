@@ -11,7 +11,6 @@ uv run pre-commit install
 ```
 This will make it so you cannot make a git commit if it does not satisfy
 conditions from [.pre-commit-config.yaml](.pre-commit-config.yaml). Namely:
-- Large files added
 - Bad formatting
 - Ruff's linter fails
 - Pyrefly's type checking fails
