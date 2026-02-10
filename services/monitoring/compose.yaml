@@ -1,0 +1,6 @@
+services:
+  jaeger:
+    image: cr.jaegertracing.io/jaegertracing/jaeger:latest
+    ports:
+      - "16686:16686"
+      - "4318:4318"
