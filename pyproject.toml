@@ -2,12 +2,43 @@
 name = "partial-mcp"
 version = "0.1.0"
 description = "Add your description here"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = [
     "pydantic-ai",
     "logfire",
     "pydantic-evals[logfire]",
+    "pydantic-ai-todo",
+    "pydantic-ai-filesystem-sandbox",
+    "poethepoet",
 ]
+
+[tool.poe.tasks.benchmark]
+script = "partial_mcp.benchmark.benchmark:evaluate"
+help = "Run benchmark"
+envfile = ".env"
+
+    [tool.poe.tasks.benchmark.args.toolsets]
+    required = true
+    positional = true
+    choices = ["relevant-only", "double"]
+    help = "The number of tools added to the agent"
+
+    [tool.poe.tasks.benchmark.args.max_cases]
+    options = ["--max-cases"]
+    type = "integer"
+    help = "Limit the number of cases included in the dataset"
+
+    [tool.poe.tasks.benchmark.args.max_concurrency]
+    options = ["--max-concurrency"]
+    type = "integer"
+    help = "Limit the number of concurrent conversation runs"
+    default = 1
+
+    [tool.poe.tasks.benchmark.args.max_turns]
+    options = ["--max-turns"]
+    type = "integer"
+    help = "Maximum number of dialog turns in each conversation"
+    default = 10
 
 [dependency-groups]
 dev = [
