@@ -25,6 +25,15 @@ from fastmcp import FastMCP
 
 
 server = FastMCP("retail")
+READ_ONLY_TOOLS = {
+    "calculate",
+    "find_user_id_by_name_zip",
+    "find_user_id_by_email",
+    "get_order_details",
+    "get_product_details",
+    "get_user_details",
+    "list_all_product_types",
+}
 
 
 class RetailTools(BaseModel):  # Tools

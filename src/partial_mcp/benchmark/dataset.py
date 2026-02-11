@@ -16,6 +16,7 @@ from pydantic import TypeAdapter, BaseModel, JsonValue
 from pydantic_evals import Case, Dataset
 from pydantic_evals.evaluators import Contains, Evaluator, EvaluatorContext
 
+from ..mcp_servers.retail.tools import READ_ONLY_TOOLS
 from .tasks import Task, EvaluationCriteria
 
 
@@ -78,6 +79,14 @@ class ToolCallF1(Evaluator[object, object, object]):
 
     tool_calls: list[ToolCall]
     """Expected tool calls."""
+    ignore_read_only: bool = False
+    """Whether to ignore read only tools when calculating the score."""
+
+    def get_default_evaluation_name(self) -> str:
+        if self.ignore_read_only:
+            return f"{self.__class__.__name__}-WriteOnlyTools"
+        else:
+            return f"{self.__class__.__name__}-AllTools"
 
     def evaluate(
         self,
@@ -89,13 +98,21 @@ class ToolCallF1(Evaluator[object, object, object]):
         actual_tool_calls = set()
         for span in tool_spans:
             request = json.loads(span.attributes["request"])
-            actual_tool_calls.add(
-                ToolCall(
-                    name=request["params"]["name"],
-                    arguments=request["params"]["arguments"],
+            if (
+                not self.ignore_read_only
+                or request["params"]["name"] not in READ_ONLY_TOOLS
+            ):
+                actual_tool_calls.add(
+                    ToolCall(
+                        name=request["params"]["name"],
+                        arguments=request["params"]["arguments"],
+                    )
                 )
-            )
-        expected_tool_calls = set(self.tool_calls)
+        expected_tool_calls = set(
+            tool_call
+            for tool_call in self.tool_calls
+            if (not self.ignore_read_only or tool_call.name not in READ_ONLY_TOOLS)
+        )
 
         tp = len(actual_tool_calls & expected_tool_calls)
         fp = len(actual_tool_calls - expected_tool_calls)
@@ -133,7 +150,15 @@ def get_dataset(max_cases: int | None = None):
                 tool_calls=[
                     ToolCall(name=action.name, arguments=action.arguments)
                     for action in criteria.actions
-                ]
+                ],
+                ignore_read_only=True,
+            ),
+            ToolCallF1(
+                tool_calls=[
+                    ToolCall(name=action.name, arguments=action.arguments)
+                    for action in criteria.actions
+                ],
+                ignore_read_only=False,
             ),
         )
 

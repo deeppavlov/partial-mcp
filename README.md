@@ -90,11 +90,6 @@ be fixed.
 If an exception repeatedly occurs during tool execution,
 the entire benchmark case is not counted in the score.
 
-#### Metric improvement
-
-Score is currently deducted for either calling or not calling unnecessary
-read-only tools as much as if the agent did not call a write tool.
-
 ## Repository Usage
 
 ### Running benchmark
