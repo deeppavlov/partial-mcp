@@ -85,11 +85,6 @@ Your goal is to implement one of these approaches and evaluate it.
 These are known issues with the current version of the benchmark and will soon
 be fixed.
 
-#### Tool exception
-
-If an exception repeatedly occurs during tool execution,
-the entire benchmark case is not counted in the score.
-
 ## Repository Usage
 
 ### Running benchmark

@@ -91,6 +91,8 @@ def evaluate(
                 last_message = user_agent_response.output
                 user_history = user_agent_response.all_messages()
                 counter += 1
+        except Exception:
+            logfire.exception("Suppressed a case exception")
         finally:
             retail.reset_db()
         return "\n\n---------\n\n".join(agent_responses)
