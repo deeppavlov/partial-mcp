@@ -9,7 +9,7 @@ from .tasks import UserInstructions
 from .dataset import get_dataset
 from .user_agent import get_user_agent
 from ..mcp_servers.retail.agent import get_agent
-from ..mcp_servers.retail.tools import server
+from ..mcp_servers.retail.tools import server, retail
 from ..toolset.toolset import Toolset
 from ..toolset.disable_toolcall import DisableToolcallToolset
 
@@ -29,7 +29,6 @@ logfire.instrument_mcp()
 def evaluate(
     toolsets: Literal["relevant-only", "double"],
     max_cases: int | None = None,
-    max_concurrency: int = 1,
     max_turns: int = 10,
 ):
     """
@@ -43,9 +42,6 @@ def evaluate(
         `double` adds tools that are completely irrelevant to the dataset.
         This doubles the amount of tools from 15 to 30.
     :param max_cases: Limit the number of cases included in the dataset.
-    :param max_concurrency:
-        Limit the number of concurrent conversation runs.
-        This is needed to avoid spamming LLM with requests.
     :param max_turns: Maximum number of dialog turns in each conversation.
     """
     user_agent = get_user_agent()
@@ -75,31 +71,34 @@ def evaluate(
         history = first_message.all_messages()
         agent_responses = []
         counter = 0
-        while counter < max_turns and not any(
-            token in last_message for token in END_TOKENS
-        ):
-            agent_response = await agent.run(
-                user_prompt=last_message,
-                message_history=history,
-            )
-            agent_responses.append(agent_response.output)
-            history = agent_response.all_messages()
+        try:
+            while counter < max_turns and not any(
+                token in last_message for token in END_TOKENS
+            ):
+                agent_response = await agent.run(
+                    user_prompt=last_message,
+                    message_history=history,
+                )
+                agent_responses.append(agent_response.output)
+                history = agent_response.all_messages()
 
-            user_agent_response = await user_agent.run(
-                deps=instructions,
-                user_prompt=agent_response.output,
-                message_history=history,
-            )
-            last_message = user_agent_response.output
-            history = user_agent_response.all_messages()
-            counter += 1
-
+                user_agent_response = await user_agent.run(
+                    deps=instructions,
+                    user_prompt=agent_response.output,
+                    message_history=history,
+                )
+                last_message = user_agent_response.output
+                history = user_agent_response.all_messages()
+                counter += 1
+        finally:
+            retail.reset_db()
         return "\n\n---------\n\n".join(agent_responses)
 
     dataset = get_dataset(max_cases=max_cases)
 
     report = dataset.evaluate_sync(
-        simulate_conversation, max_concurrency=max_concurrency
+        simulate_conversation,
+        max_concurrency=1,  # have to keep at 1 for reset_db to work properly
     )
 
     report.print()

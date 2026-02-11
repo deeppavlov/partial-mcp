@@ -59,6 +59,9 @@ class RetailTools(BaseModel):  # Tools
         server.tool(self.return_delivered_order_items)
         server.tool(self.transfer_to_human_agents)
 
+    def reset_db(self):
+        self.db = get_db()
+
     def _get_order(self, order_id: str) -> Order:
         """Get the order from the database.
 

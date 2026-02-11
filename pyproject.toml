@@ -28,12 +28,6 @@ envfile = ".env"
     type = "integer"
     help = "Limit the number of cases included in the dataset"
 
-    [tool.poe.tasks.benchmark.args.max_concurrency]
-    options = ["--max-concurrency"]
-    type = "integer"
-    help = "Limit the number of concurrent conversation runs"
-    default = 1
-
     [tool.poe.tasks.benchmark.args.max_turns]
     options = ["--max-turns"]
     type = "integer"
