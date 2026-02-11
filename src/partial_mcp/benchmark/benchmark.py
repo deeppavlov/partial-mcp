@@ -68,7 +68,8 @@ def evaluate(
         first_message = await user_agent.run(deps=instructions)
 
         last_message = first_message.output
-        history = first_message.all_messages()
+        user_history = first_message.all_messages()
+        agent_history = []
         agent_responses = []
         counter = 0
         try:
@@ -77,18 +78,18 @@ def evaluate(
             ):
                 agent_response = await agent.run(
                     user_prompt=last_message,
-                    message_history=history,
+                    message_history=agent_history,
                 )
                 agent_responses.append(agent_response.output)
-                history = agent_response.all_messages()
+                agent_history = agent_response.all_messages()
 
                 user_agent_response = await user_agent.run(
                     deps=instructions,
                     user_prompt=agent_response.output,
-                    message_history=history,
+                    message_history=user_history,
                 )
                 last_message = user_agent_response.output
-                history = user_agent_response.all_messages()
+                user_history = user_agent_response.all_messages()
                 counter += 1
         finally:
             retail.reset_db()
