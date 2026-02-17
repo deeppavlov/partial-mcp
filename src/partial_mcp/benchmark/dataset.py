@@ -14,7 +14,12 @@ import json
 import logfire
 from pydantic import TypeAdapter, BaseModel, JsonValue
 from pydantic_evals import Case, Dataset
-from pydantic_evals.evaluators import Contains, Evaluator, EvaluatorContext
+from pydantic_evals.evaluators import (
+    Contains,
+    Evaluator,
+    EvaluatorContext,
+    EvaluatorOutput,
+)
 
 from ..mcp_servers.retail.tools import READ_ONLY_TOOLS
 from .tasks import Task, EvaluationCriteria
@@ -74,24 +79,18 @@ class ToolCall(BaseModel, frozen=True):
 
 
 @dataclass(repr=False)
-class ToolCallF1(Evaluator[object, object, object]):
-    """Calculate tool call F1 metric based on the spans collected by logfire."""
+class ToolCallMetrics(Evaluator[object, object, object]):
+    """Calculate tool call F1, recall, precision metrics based on the spans collected by logfire."""
 
     tool_calls: list[ToolCall]
     """Expected tool calls."""
     ignore_read_only: bool = False
     """Whether to ignore read only tools when calculating the score."""
 
-    def get_default_evaluation_name(self) -> str:
-        if self.ignore_read_only:
-            return f"{self.__class__.__name__}-WriteOnlyTools"
-        else:
-            return f"{self.__class__.__name__}-AllTools"
-
     def evaluate(
         self,
         ctx: EvaluatorContext[object, object, object],
-    ) -> float:
+    ) -> EvaluatorOutput:
         tool_spans = ctx.span_tree.find(
             lambda node: "MCP request: tools/call" in node.name
         )
@@ -132,7 +131,15 @@ class ToolCallF1(Evaluator[object, object, object]):
             if precision + recall > 0
             else 0.0
         )
-        return round(f1, 4)
+        if self.ignore_read_only:
+            prefix = "WriteOnlyTools"
+        else:
+            prefix = "AllTools"
+        return {
+            f"{prefix}F1": round(f1, 4),
+            f"{prefix}Precision": precision,
+            f"{prefix}Recall": recall,
+        }
 
 
 def get_dataset(max_cases: int | None = None):
@@ -146,14 +153,14 @@ def get_dataset(max_cases: int | None = None):
     ) -> tuple[Evaluator, ...]:
         return (
             *(Contains(info) for info in criteria.communicate_info),
-            ToolCallF1(
+            ToolCallMetrics(
                 tool_calls=[
                     ToolCall(name=action.name, arguments=action.arguments)
                     for action in criteria.actions
                 ],
                 ignore_read_only=True,
             ),
-            ToolCallF1(
+            ToolCallMetrics(
                 tool_calls=[
                     ToolCall(name=action.name, arguments=action.arguments)
                     for action in criteria.actions
