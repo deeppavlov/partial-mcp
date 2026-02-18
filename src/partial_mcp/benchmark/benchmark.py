@@ -3,6 +3,7 @@ from typing import Literal
 from pydantic_ai.toolsets.fastmcp import FastMCPToolset
 from pydantic_ai_todo import create_todo_toolset
 from pydantic_ai_filesystem_sandbox import FileSystemToolset
+from pydantic_ai import UnexpectedModelBehavior
 import logfire
 
 from .tasks import UserInstructions
@@ -91,7 +92,7 @@ def evaluate(
                 last_message = user_agent_response.output
                 user_history = user_agent_response.all_messages()
                 counter += 1
-        except Exception:
+        except UnexpectedModelBehavior:
             logfire.exception("Suppressed a case exception")
         finally:
             retail.reset_db()
