@@ -140,7 +140,7 @@ Place your implementation of the solution in the [toolset.py file](
 ./src/partial_mcp/toolset/toolset.py
 ).
 There you can redefine the following methods:
-- `validate` to perform once-per-benchmark tool pre-processing
+- `prepare` to perform once-per-benchmark tool pre-processing
 - `get_tools` to change the tools available to the agent
 - `call_tool` to change the way tools are called
 

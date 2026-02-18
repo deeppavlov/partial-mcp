@@ -11,7 +11,6 @@ from .dataset import get_dataset
 from .user_agent import get_user_agent
 from ..mcp_servers.retail.agent import get_agent
 from ..mcp_servers.retail.tools import server, retail
-from ..toolset.toolset import Toolset
 from ..toolset.disable_toolcall import DisableToolcallToolset
 
 
@@ -27,7 +26,7 @@ logfire.instrument_pydantic_ai()
 logfire.instrument_mcp()
 
 
-def evaluate(
+async def evaluate(
     toolsets: Literal["relevant-only", "double"],
     max_cases: int | None = None,
     max_turns: int = 10,
@@ -47,21 +46,15 @@ def evaluate(
     """
     user_agent = get_user_agent()
     if toolsets == "relevant-only":
-        agent = get_agent(toolsets=[Toolset(toolsets=[FastMCPToolset(server)])])
+        agent = await get_agent(toolsets=[FastMCPToolset(server)])
     elif toolsets == "double":
-        agent = get_agent(
+        agent = await get_agent(
             toolsets=[
-                Toolset(
-                    toolsets=[
-                        FastMCPToolset(server),
-                        DisableToolcallToolset(
-                            create_todo_toolset(enable_subtasks=True)
-                        ),
-                        DisableToolcallToolset(
-                            FileSystemToolset.create_default("./data", mode="rw")
-                        ),
-                    ]
-                )
+                FastMCPToolset(server),
+                DisableToolcallToolset(create_todo_toolset(enable_subtasks=True)),
+                DisableToolcallToolset(
+                    FileSystemToolset.create_default("./data", mode="rw")
+                ),
             ]
         )
 
@@ -100,7 +93,7 @@ def evaluate(
 
     dataset = get_dataset(max_cases=max_cases)
 
-    report = dataset.evaluate_sync(
+    report = await dataset.evaluate(
         simulate_conversation,
         max_concurrency=1,  # have to keep at 1 for reset_db to work properly
     )

@@ -4,11 +4,10 @@ Toolset
 This module is used for custom tool handling logic.
 """
 
-from typing import Any, Iterable
+from typing import Any
 
-from pydantic_ai.toolsets import CombinedToolset, ToolsetTool, AbstractToolset
+from pydantic_ai.toolsets import CombinedToolset, ToolsetTool
 from pydantic_ai.tools import RunContext, AgentDepsT
-from pydantic import field_validator
 
 
 class Toolset(CombinedToolset):
@@ -18,21 +17,20 @@ class Toolset(CombinedToolset):
     Its methods can be redefined to allow for custom tool handling.
     """
 
-    @field_validator("toolsets", mode="after")
-    @classmethod
-    def validate(cls, toolsets: Iterable[AbstractToolset]) -> Iterable[AbstractToolset]:
+    async def prepare(self):
         """
-        A validator for toolsets.
         This function will be called only once during benchmark:
         when setting up the agent.
 
         You can do some pre-processing here. For example:
         - send toolset data to some endpoint in order to prepare it
-
-        :param toolsets: An iterable of toolsets.
-        :return: A modified iterable of toolsets.
         """
-        return toolsets
+        for toolset in self.toolsets:
+            for tool in (
+                await toolset.get_tools(ctx=None)  # pyrefly: ignore[bad-argument-type]
+            ).values():
+                print(tool.tool_def.description)
+                print(tool.tool_def.parameters_json_schema)
 
     async def get_tools(
         self, ctx: RunContext[AgentDepsT]

@@ -9,17 +9,21 @@ from pathlib import Path
 
 from pydantic_ai import Agent, AbstractToolset
 
+from ...toolset.toolset import Toolset
 from ...model import model
 
 
-def get_agent(toolsets: list[AbstractToolset]) -> Agent[None, str]:
+async def get_agent(toolsets: list[AbstractToolset]) -> Agent[None, str]:
     with open(Path(__file__).parent / "policy.md", "r") as f:
         prompt = f.read()
+
+    toolset = Toolset(toolsets)
+    await toolset.prepare()
 
     agent = Agent(
         model=model,
         instructions=prompt,
-        toolsets=toolsets,
+        toolsets=[toolset],
     )
 
     return agent
