@@ -89,3 +89,13 @@ class Toolset(CombinedToolset):
         :return: Result of the tool call.
         """
         return await super().call_tool(name, tool_args, ctx, tool)
+
+    def visit_and_replace(self, visitor):
+        """
+        Disable visit and replace method to prevent the creation of new objects
+        of this class every agent run.
+
+        This method is originally called every run to recreate DynamicToolset
+        objects but ends up recreating CombinedToolset objects as well.
+        """
+        return self
