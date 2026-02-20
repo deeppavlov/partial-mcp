@@ -9,6 +9,8 @@ from typing import Any
 from pydantic_ai.toolsets import CombinedToolset, ToolsetTool
 from pydantic_ai.tools import RunContext
 
+from .utils import extract_message_history_from_context, extract_query_from_context
+
 
 class Toolset(CombinedToolset):
     """
@@ -56,6 +58,14 @@ class Toolset(CombinedToolset):
             https://ai.pydantic.dev/api/tools/#pydantic_ai.tools.RunContext.prompt
         :return: A dictionary mapping tool names to tool definitions.
         """
+        # example of using extraction utils:
+        user_query = extract_query_from_context(ctx)
+        history = extract_message_history_from_context(ctx)
+
+        if not isinstance(user_query, str) or not isinstance(history, list):
+            raise RuntimeError("Extraction error")
+
+        # in order to remove extra tools you can either modify original tools or return another dictionary
         original_tools = await super().get_tools(ctx)
         return original_tools
 
