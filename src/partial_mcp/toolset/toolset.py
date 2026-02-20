@@ -25,12 +25,20 @@ class Toolset(CombinedToolset):
         You can do some pre-processing here. For example:
         - send toolset data to some endpoint in order to prepare it
         """
+        # This is an example implementation of the prepare function
+        # Currently it simply prints the total length of all tool descriptions
+        # You can change this function however you wish
+        count = 0
         for toolset in self.toolsets:
             for tool in (
                 await toolset.get_tools(ctx=None)  # pyrefly: ignore[bad-argument-type]
             ).values():
-                print(tool.tool_def.description)
-                print(tool.tool_def.parameters_json_schema)
+                count += len(tool.tool_def.description or "")
+
+        print(
+            f"Total character length of tool descriptions: {count}.\n"
+            f"Rough token estimate (assuming 4 chars/token): {count / 4}."
+        )
 
     async def get_tools(
         self, ctx: RunContext[AgentDepsT]
