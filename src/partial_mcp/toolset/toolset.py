@@ -7,7 +7,7 @@ This module is used for custom tool handling logic.
 from typing import Any
 
 from pydantic_ai.toolsets import CombinedToolset, ToolsetTool
-from pydantic_ai.tools import RunContext, AgentDepsT
+from pydantic_ai.tools import RunContext
 
 
 class Toolset(CombinedToolset):
@@ -40,9 +40,7 @@ class Toolset(CombinedToolset):
             f"Rough token estimate (assuming 4 chars/token): {count / 4}."
         )
 
-    async def get_tools(
-        self, ctx: RunContext[AgentDepsT]
-    ) -> dict[str, ToolsetTool[AgentDepsT]]:
+    async def get_tools(self, ctx: RunContext) -> dict[str, ToolsetTool]:
         """
         Get tools available to agent.
         This function will be called every time agent is run.
@@ -65,8 +63,8 @@ class Toolset(CombinedToolset):
         self,
         name: str,
         tool_args: dict[str, Any],
-        ctx: RunContext[AgentDepsT],
-        tool: ToolsetTool[AgentDepsT],
+        ctx: RunContext,
+        tool: ToolsetTool,
     ) -> Any:
         """
         Execute a tool.

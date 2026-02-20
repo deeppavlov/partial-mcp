@@ -8,7 +8,6 @@ This is needed to ensure that irrelevant tools will not be called.
 from typing import Any
 
 from pydantic_ai import RunContext, ToolsetTool
-from pydantic_ai.tools import AgentDepsT
 
 from pydantic_ai.toolsets import WrapperToolset
 
@@ -22,7 +21,7 @@ class DisableToolcallToolset(WrapperToolset):
         self,
         name: str,
         tool_args: dict[str, Any],
-        ctx: RunContext[AgentDepsT],
-        tool: ToolsetTool[AgentDepsT],
+        ctx: RunContext,
+        tool: ToolsetTool,
     ) -> Any:
         raise RestrictedToolCallException(f"Tried calling restricted tool {name}.")
