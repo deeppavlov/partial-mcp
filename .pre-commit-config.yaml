@@ -17,4 +17,5 @@ repos:
     hooks:
       - id: pyrefly-check
         entry: uv run pyrefly check
+        pass_filenames: true
         args: ["--baseline=pyrefly-baseline.json"]
