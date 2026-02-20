@@ -11,7 +11,7 @@ from .dataset import get_dataset
 from .user_agent import get_user_agent
 from ..mcp_servers.retail.agent import get_agent
 from ..mcp_servers.retail.tools import server, retail
-from ..toolset.disable_toolcall import DisableToolcallToolset
+from ..mcp_servers.disable_toolcall import DisableToolcallWrapper
 
 
 END_TOKENS = ("###STOP###", "###TRANSFER###", "###OUT-OF-SCOPE###")
@@ -51,8 +51,8 @@ async def evaluate(
         agent = await get_agent(
             toolsets=[
                 FastMCPToolset(server),
-                DisableToolcallToolset(create_todo_toolset(enable_subtasks=True)),
-                DisableToolcallToolset(
+                DisableToolcallWrapper(create_todo_toolset(enable_subtasks=True)),
+                DisableToolcallWrapper(
                     FileSystemToolset.create_default("./data", mode="rw")
                 ),
             ]
