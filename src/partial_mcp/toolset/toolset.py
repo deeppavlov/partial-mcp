@@ -35,7 +35,13 @@ class Toolset(CombinedToolset):
         tool_count = 0
         for toolset in self.toolsets:
             for tool in (
-                await toolset.get_tools(ctx=None)  # pyrefly: ignore[bad-argument-type]
+                await toolset.get_tools(
+                    ctx=RunContext(
+                        deps=None,
+                        model=None,  # pyrefly: ignore[bad-argument-type]
+                        usage=None,  # pyrefly: ignore[bad-argument-type]
+                    )
+                )
             ).values():
                 count += len(tool.tool_def.description or "")
                 tool_count += 1
