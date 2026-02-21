@@ -29,15 +29,19 @@ class Toolset(CombinedToolset):
         """
         # This is an example implementation of the prepare function
         # Currently it simply prints the total length of all tool descriptions
+        # and the number of tools
         # You can change this function however you wish
         count = 0
+        tool_count = 0
         for toolset in self.toolsets:
             for tool in (
                 await toolset.get_tools(ctx=None)  # pyrefly: ignore[bad-argument-type]
             ).values():
                 count += len(tool.tool_def.description or "")
+                tool_count += 1
 
         print(
+            f"Total number of tools: {tool_count}.\n"
             f"Total character length of tool descriptions: {count}.\n"
             f"Rough token estimate (assuming 4 chars/token): {count / 4}."
         )
